@@ -1,0 +1,75 @@
+module load miniconda; conda activate spatialdata; python plot_xenium_slide.py --brnum 5173 --celltype END --gene FKBP5
+module load miniconda; conda activate spatialdata; python plot_xenium_slide.py --brnum 5638 --celltype END --gene FKBP5
+module load miniconda; conda activate spatialdata; python plot_xenium_slide.py --brnum 8020 --celltype END --gene FKBP5
+module load miniconda; conda activate spatialdata; python plot_xenium_slide.py --brnum 5173 --celltype END --gene PDE10A
+module load miniconda; conda activate spatialdata; python plot_xenium_slide.py --brnum 5638 --celltype END --gene PDE10A
+module load miniconda; conda activate spatialdata; python plot_xenium_slide.py --brnum 8020 --celltype END --gene PDE10A
+module load miniconda; conda activate spatialdata; python plot_xenium_slide.py --brnum 5173 --celltype END --gene YBX3
+module load miniconda; conda activate spatialdata; python plot_xenium_slide.py --brnum 5638 --celltype END --gene YBX3
+module load miniconda; conda activate spatialdata; python plot_xenium_slide.py --brnum 8020 --celltype END --gene YBX3
+module load miniconda; conda activate spatialdata; python plot_xenium_slide.py --brnum 5173 --celltype END --gene STAT3
+module load miniconda; conda activate spatialdata; python plot_xenium_slide.py --brnum 5638 --celltype END --gene STAT3
+module load miniconda; conda activate spatialdata; python plot_xenium_slide.py --brnum 8020 --celltype END --gene STAT3
+module load miniconda; conda activate spatialdata; python plot_xenium_slide.py --brnum 5173 --celltype END --gene PECAM1
+module load miniconda; conda activate spatialdata; python plot_xenium_slide.py --brnum 5638 --celltype END --gene PECAM1
+module load miniconda; conda activate spatialdata; python plot_xenium_slide.py --brnum 8020 --celltype END --gene PECAM1
+module load miniconda; conda activate spatialdata; python plot_xenium_slide.py --brnum 5173 --celltype END --gene COL4A1
+module load miniconda; conda activate spatialdata; python plot_xenium_slide.py --brnum 5638 --celltype END --gene COL4A1
+module load miniconda; conda activate spatialdata; python plot_xenium_slide.py --brnum 8020 --celltype END --gene COL4A1
+module load miniconda; conda activate spatialdata; python plot_xenium_slide.py --brnum 5173 --celltype END --gene IFITM3
+module load miniconda; conda activate spatialdata; python plot_xenium_slide.py --brnum 5638 --celltype END --gene IFITM3
+module load miniconda; conda activate spatialdata; python plot_xenium_slide.py --brnum 8020 --celltype END --gene IFITM3
+module load miniconda; conda activate spatialdata; python plot_xenium_slide.py --brnum 5173 --celltype AST --gene YBX3
+module load miniconda; conda activate spatialdata; python plot_xenium_slide.py --brnum 5638 --celltype AST --gene YBX3
+module load miniconda; conda activate spatialdata; python plot_xenium_slide.py --brnum 8020 --celltype AST --gene YBX3
+module load miniconda; conda activate spatialdata; python plot_xenium_slide.py --brnum 5173 --celltype AST --gene HILPDA
+module load miniconda; conda activate spatialdata; python plot_xenium_slide.py --brnum 5638 --celltype AST --gene HILPDA
+module load miniconda; conda activate spatialdata; python plot_xenium_slide.py --brnum 8020 --celltype AST --gene HILPDA
+module load miniconda; conda activate spatialdata; python plot_xenium_slide.py --brnum 5173 --celltype AST --gene ZFP36
+module load miniconda; conda activate spatialdata; python plot_xenium_slide.py --brnum 5638 --celltype AST --gene ZFP36
+module load miniconda; conda activate spatialdata; python plot_xenium_slide.py --brnum 8020 --celltype AST --gene ZFP36
+module load miniconda; conda activate spatialdata; python plot_xenium_slide.py --brnum 5173 --celltype AST --gene IFITM3
+module load miniconda; conda activate spatialdata; python plot_xenium_slide.py --brnum 5638 --celltype AST --gene IFITM3
+module load miniconda; conda activate spatialdata; python plot_xenium_slide.py --brnum 8020 --celltype AST --gene IFITM3
+module load miniconda; conda activate spatialdata; python plot_xenium_slide.py --brnum 5173 --celltype AST --gene SERPINA3
+module load miniconda; conda activate spatialdata; python plot_xenium_slide.py --brnum 5638 --celltype AST --gene SERPINA3
+module load miniconda; conda activate spatialdata; python plot_xenium_slide.py --brnum 8020 --celltype AST --gene SERPINA3
+module load miniconda; conda activate spatialdata; python plot_xenium_slide.py --brnum 5173 --celltype MIC --gene CD14
+module load miniconda; conda activate spatialdata; python plot_xenium_slide.py --brnum 5638 --celltype MIC --gene CD14
+module load miniconda; conda activate spatialdata; python plot_xenium_slide.py --brnum 8020 --celltype MIC --gene CD14
+module load miniconda; conda activate spatialdata; python plot_xenium_slide.py --brnum 5173 --celltype MIC --gene SLC11A1
+module load miniconda; conda activate spatialdata; python plot_xenium_slide.py --brnum 5638 --celltype MIC --gene SLC11A1
+module load miniconda; conda activate spatialdata; python plot_xenium_slide.py --brnum 8020 --celltype MIC --gene SLC11A1
+module load miniconda; conda activate spatialdata; python plot_xenium_slide.py --brnum 5173 --celltype MIC --gene STAT3
+module load miniconda; conda activate spatialdata; python plot_xenium_slide.py --brnum 5638 --celltype MIC --gene STAT3
+module load miniconda; conda activate spatialdata; python plot_xenium_slide.py --brnum 8020 --celltype MIC --gene STAT3
+module load miniconda; conda activate spatialdata; python plot_xenium_slide.py --brnum 5173 --celltype MIC --gene ZFP36
+module load miniconda; conda activate spatialdata; python plot_xenium_slide.py --brnum 5638 --celltype MIC --gene ZFP36
+module load miniconda; conda activate spatialdata; python plot_xenium_slide.py --brnum 8020 --celltype MIC --gene ZFP36
+module load miniconda; conda activate spatialdata; python plot_xenium_slide.py --brnum 5173 --celltype RORB --gene RIT2
+module load miniconda; conda activate spatialdata; python plot_xenium_slide.py --brnum 5638 --celltype RORB --gene RIT2
+module load miniconda; conda activate spatialdata; python plot_xenium_slide.py --brnum 8020 --celltype RORB --gene RIT2
+module load miniconda; conda activate spatialdata; python plot_xenium_slide.py --brnum 5173 --celltype FEZF2 --gene JUN
+module load miniconda; conda activate spatialdata; python plot_xenium_slide.py --brnum 5638 --celltype FEZF2 --gene JUN
+module load miniconda; conda activate spatialdata; python plot_xenium_slide.py --brnum 8020 --celltype FEZF2 --gene JUN
+module load miniconda; conda activate spatialdata; python plot_xenium_slide.py --brnum 5173 --celltype OPC --gene JUN
+module load miniconda; conda activate spatialdata; python plot_xenium_slide.py --brnum 5638 --celltype OPC --gene JUN
+module load miniconda; conda activate spatialdata; python plot_xenium_slide.py --brnum 8020 --celltype OPC --gene JUN
+module load miniconda; conda activate spatialdata; python plot_xenium_slide.py --brnum 5173 --celltype OPRK1 --gene MYO16
+module load miniconda; conda activate spatialdata; python plot_xenium_slide.py --brnum 5638 --celltype OPRK1 --gene MYO16
+module load miniconda; conda activate spatialdata; python plot_xenium_slide.py --brnum 8020 --celltype OPRK1 --gene MYO16
+module load miniconda; conda activate spatialdata; python plot_xenium_slide.py --brnum 5173 --celltype PVALB --gene JUN
+module load miniconda; conda activate spatialdata; python plot_xenium_slide.py --brnum 5638 --celltype PVALB --gene JUN
+module load miniconda; conda activate spatialdata; python plot_xenium_slide.py --brnum 8020 --celltype PVALB --gene JUN
+module load miniconda; conda activate spatialdata; python plot_xenium_slide.py --brnum 5173 --celltype VIP --gene JUN
+module load miniconda; conda activate spatialdata; python plot_xenium_slide.py --brnum 5638 --celltype VIP --gene JUN
+module load miniconda; conda activate spatialdata; python plot_xenium_slide.py --brnum 8020 --celltype VIP --gene JUN
+module load miniconda; conda activate spatialdata; python plot_xenium_slide.py --brnum 5173 --celltype VIP --gene IGFBP5
+module load miniconda; conda activate spatialdata; python plot_xenium_slide.py --brnum 5638 --celltype VIP --gene IGFBP5
+module load miniconda; conda activate spatialdata; python plot_xenium_slide.py --brnum 8020 --celltype VIP --gene IGFBP5
+
+
+
+
+
+
