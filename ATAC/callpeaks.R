@@ -23,5 +23,3 @@ proj <- addReproduciblePeakSet(
 saveArchRProject(proj)
 
 proj <- addPeakMatrix(proj)
-
-
