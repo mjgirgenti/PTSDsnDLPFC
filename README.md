@@ -29,7 +29,7 @@ conda env create -f environment.yml
 
 ## Usage
 
-The repository is divided into directories: `RNA`, `CCC`, `ATAC`, `Multiome`, and `GWAS`, representing major analyses of the paper. In each folder, we split analysis steps into separate files, with detailed comments. Please also refer to the jupyter notebook tutorials listed below for instructions. 
+The repository is divided into directories: `RNA`, `Xenium`, `CCC`, `ATAC`, `Multiome`, and `GWAS`, representing major analyses of the paper. In each folder, we split analysis steps into separate files, with detailed comments. Please also refer to the jupyter notebook tutorials listed below for instructions. 
 
 ## Quick Tutorials
 
