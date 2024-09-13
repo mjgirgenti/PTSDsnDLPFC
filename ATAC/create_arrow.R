@@ -18,7 +18,7 @@ sampleNames <- sapply(strsplit(sampleNames,'[.]'),`[`,1)
 ArrowFiles <- createArrowFiles(
   inputFiles = inputFiles,
   sampleNames = sampleNames,
-  minTSS = 2, #Dont set this too high because you can always increase later
+  minTSS = 4, #Dont set this too high because you can always increase later
   minFrags = 1000,
   addTileMat = TRUE,
   addGeneScoreMat = TRUE,

@@ -2,14 +2,14 @@ library(ArchR)
 library(stringr)
 library(parallel)
 
-addArchRThreads(threads = 30)
+addArchRThreads(threads = 10)
 addArchRGenome("hg38")
 
-proj <- loadArchRProject('/home/ah2428/girgenti_scratch60/atac/94_samples')
-
-proj <- addIterativeLSI(ArchRProj = proj, useMatrix = "TileMatrix", name = "IterativeLSI")
-proj <- addClusters(input = proj, reducedDims = "IterativeLSI")
-proj <- addUMAP(ArchRProj = proj, reducedDims = "IterativeLSI")
+proj <- loadArchRProject('/home/ah2428/girgenti_scratch60/atac/94_samples_tss4_100K_3_removed_3_5_7_13_16_17_18')
+print(proj)
+proj <- addIterativeLSI(ArchRProj = proj, useMatrix = "TileMatrix", name = "IterativeLSI",force=TRUE)
+proj <- addClusters(input = proj, reducedDims = "IterativeLSI",sampleCells=100000,force=TRUE)
+proj <- addUMAP(ArchRProj = proj, reducedDims = "IterativeLSI",force=TRUE)
 p1 <- plotEmbedding(ArchRProj = proj, colorBy = "cellColData", name = "Sample", embedding = "UMAP")
 p2 <- plotEmbedding(ArchRProj = proj, colorBy = "cellColData", name = "Clusters", embedding = "UMAP")
 plotPDF(p1,p2, name = "Plot-UMAP-Sample-Clusters.pdf",
@@ -36,18 +36,8 @@ p <- plotEmbedding(
     imputeWeights = getImputeWeights(proj)
 )
 
-p2 <- lapply(p, function(x){
-    x + guides(color = FALSE, fill = FALSE) +
-    theme_ArchR(baseSize = 6.5) +
-    theme(plot.margin = unit(c(0, 0, 0, 0), "cm")) +
-    theme(
-        axis.text.x=element_blank(),
-        axis.ticks.x=element_blank(),
-        axis.text.y=element_blank(),
-        axis.ticks.y=element_blank()
-    )
-})
-do.call(cowplot::plot_grid, c(list(ncol = 5),p2))
-ggsave('/home/ah2428/girgenti_scratch60/atac/94_samples/Plots/genes.pdf')
-
+plotPDF(plotList = p,
+    name = "genes.pdf",
+    ArchRProj = proj,
+    addDOC = FALSE, width = 5, height = 5)
 

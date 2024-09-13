@@ -1,0 +1,10 @@
+module load miniconda; conda activate ATAC2; Rscript finemap_table.R ELFN1 INH totalPCL 
+module load miniconda; conda activate ATAC2; Rscript finemap_table.R EGR3 EXC totalPCL 
+module load miniconda; conda activate ATAC2; Rscript finemap_table.R KCNIP4 EXC totalPCL 
+module load miniconda; conda activate ATAC2; Rscript finemap_table.R LRFN5 EXC totalPCL
+module load miniconda; conda activate ATAC2; Rscript finemap_table.R OPCML INH reexperiencing
+module load miniconda; conda activate ATAC2; Rscript finemap_table.R EGR3 INH totalPCL
+module load miniconda; conda activate ATAC2; Rscript finemap_table.R CAMKV EXC totalPCL
+module load miniconda; conda activate ATAC2; Rscript finemap_table.R CAMKV EXC reexperiencing
+module load miniconda; conda activate ATAC2; Rscript finemap_table.R TCF4 INH reexperiencing
+module load miniconda; conda activate ATAC2; Rscript finemap_table.R CRHR1 INH totalPCL

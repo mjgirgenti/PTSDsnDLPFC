@@ -15,7 +15,6 @@ Below, we will list the major steps and associating script files in this directo
 ## Peak Calling and CRE set creation
 
 - Peak calling: `callpeaks.R`
-- Add peak set: `addPeakSet.R`
 - Create cell by peak matrix using the generated/added peak set: `addPeakMatrix.R`
 - Cell clustering: `clustering.R`
 - Plot marker genes: `marker_genes_heatmap.R`

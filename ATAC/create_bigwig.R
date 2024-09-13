@@ -4,11 +4,6 @@ library(parallel)
 
 addArchRThreads(threads = 20) 
 
-args = commandArgs(trailingOnly=TRUE)
-#cluster <- args[1]
-#numcells <- as.integer(args[2])
-
-#proj <- loadArchRProject(glue('/gpfs/gibbs/pi/girgenti/JZhang/commonData/PTSD/ATAC/data/celltype_recall_peaks/{cluster}'))
 
 proj <- loadArchRProject('/gpfs/gibbs/pi/girgenti/JZhang/commonData/PTSD/ATAC/data/ATAC_FINAL')
 

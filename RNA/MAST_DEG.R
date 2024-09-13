@@ -8,36 +8,43 @@ library(data.table)
 library(stringr)
 library(edgeR)
 library(dplyr)
+library(argparse)
 
-args = commandArgs(trailingOnly=TRUE)
+parser <- ArgumentParser()
+parser$add_argument('--celltype', type='character', help='celltype')
+parser$add_argument('--condition', type='character', help='condition')
+parser$add_argument('--datapath', type='character', help='datapath')
+parser$add_argument('--savepath', type='character', help='savepath')
+parser$add_argument('--cpm', type='character', help='cpm', default='F')
+parser$add_argument('--covs', type='character', help='covs', default='all')
+args <- parser$parse_args()
 
-cluster <- args[1] # celltype
-cond <- args[2] # condition (PTSD,MDD)
-
-folder <- glue('/gpfs/gibbs/pi/girgenti/JZhang/commonData/PTSD/RNA/results/062522_DEG/subclass/mast/{cond}_vs_CON')
-data <- LoadH5Seurat(glue('/gpfs/gibbs/pi/girgenti/JZhang/commonData/PTSD/RNA/data/DEG_data_subclass_062522/{cond}_vs_CON/{cond}_CON_{cluster}.h5seurat'),assays='RNA')
-meta <- read.delim2(glue('/gpfs/gibbs/pi/girgenti/JZhang/commonData/PTSD/RNA/data/DEG_data_subclass_062522/{cond}_vs_CON/{cond}_CON_{cluster}_meta.txt'))
-
-print(cluster)
+celltype <- args$celltype
+cond <- args$condition
+datapath <- args$datapath
+savepath <- args$savepath
+covs <- args$covs
+print(celltype)
 print(cond)
 
+data <- LoadH5Seurat(glue('{datapath}/{cond}_CON_{celltype}.h5seurat'),assays='RNA',meta.data=FALSE)
+meta <- read.delim2(glue('{datapath}/{cond}_CON_{celltype}_meta.txt'))
+
+protein <- read.table('/home/ah2428/ShareZhangLab/CommonData/protein_coding.genes.with.chr.txt')$V2
+protein_genes <- intersect(rownames(data),protein)
+data <- data[protein_genes,]
+print(dim(data))
+
+data_size <- as.double(dim(data)[1]) * as.double(dim(data)[2])
+lim <- 2^31
+print(data_size < lim)
+
 # if exceed R memory 2^31
-if (dim(data)[2] > 76745) {
-    print('True')
-    mat <- data$RNA@counts
-    tmp <- matrix(data = 0, nrow=nrow(mat), ncol=ncol(mat))
-    row_pos <- mat@i+1
-    col_pos <- findInterval(seq(mat@x)-1,mat@p[-1])+1
-    val <- mat@x
-    for (i in seq_along(val)){
-        tmp[row_pos[i],col_pos[i]] <- val[i]
-    }
-    rownames(tmp) <- rownames(mat)
-    colnames(tmp) <- colnames(mat)
-    dge <- DGEList(counts = tmp)
-    dge <- edgeR::calcNormFactors(dge)
-    cpms <- cpm(dge)
-    bin_counts <- as.matrix((tmp > 0) + 0)
+if (args$cpm == 'T') {
+    genes = read.csv(glue('{datapath}/EXC_genes.csv'),header=0)$V1
+    data <- data[genes,]
+    cpms = fread(glue('{datapath}/EXC_cpms.csv.gz'))
+    cpms <- as.matrix(cpms)
 } else {
     counts <- data$RNA@counts
     dge <- DGEList(counts = counts)
@@ -46,6 +53,8 @@ if (dim(data)[2] > 76745) {
     bin_counts <- as.matrix((counts > 0) + 0)
 }
 
+counts <- data$RNA@counts
+bin_counts <- as.matrix((counts > 0) + 0)
 logcpms <- log2(cpms+1)
 
 data@meta.data$wellKey <- rownames(data@meta.data)
@@ -68,6 +77,7 @@ meta <- transform(meta, RIN = as.numeric(RIN))
 
 colData(sca)$cdr <- scale(colSums(assay(sca)>0))
 colData(sca)$condition <- as.factor(meta$Condition)
+colData(sca)$condition <- relevel(colData(sca)$condition,'CON')
 colData(sca)$age <- as.numeric(meta$AgeDeath)
 colData(sca)$pmi <- as.numeric(meta$PMI)
 colData(sca)$rin <- as.numeric(meta$RIN)
@@ -75,7 +85,31 @@ colData(sca)$sex <- as.factor(meta$Sex)
 colData(sca)$race <- as.factor(meta$Race)
 
 print('starting MAST')
-zlm_output <- zlm(~ condition + cdr + age + pmi + rin + sex + race, sca)
+if (covs=='all') {
+    print('Running with all covariates')
+    zlm_output <- zlm(~ condition + cdr + age + pmi + rin + sex + race, sca)
+} else if (covs=='cdr') {
+    print('Running with cdr covariate only')
+    zlm_output <- zlm(~ condition + cdr, sca)
+} else if (covs=='age') {
+    print('Running with age covariate only')
+    zlm_output <- zlm(~ condition + age, sca)
+} else if (covs=='pmi') {
+    print('Running with pmi covariate only')
+    zlm_output <- zlm(~ condition + pmi, sca)
+} else if (covs=='rin') {
+    print('Running with rin covariate only')
+    zlm_output <- zlm(~ condition + rin, sca)
+} else if (covs=='sex') {
+    print('Running with sex covariate only')
+    zlm_output <- zlm(~ condition + sex, sca)
+} else if (covs=='race') {
+    print('Running with race covariate only')
+    zlm_output <- zlm(~ condition + race, sca)
+} else {
+    print('Running without covariates')
+    zlm_output <- zlm(~ condition, sca)
+}
 print('finished MAST')
 
 summaryCond <- summary(zlm_output, doLRT=glue('condition{cond}')) 
@@ -87,52 +121,19 @@ deg[,fdr:=p.adjust(`Pr(>Chisq)`, 'fdr')]
 
 deg <- merge(deg[fdr<1 & abs(coef)>0], as.data.table(mcols(sca)), by='primerid')
 setorder(deg, fdr)
-write.table(deg,glue('{folder}/{cluster}_DEG.csv'),sep='\t')
+write.table(deg,glue('{savepath}/{celltype}_MAST_DEG.csv'),sep='\t')
 
 sig_deg = deg[ which(deg$fdr < 0.01 & abs(deg$coef) > log2(1.2)), ]
-write.table(sig_deg,glue('{folder}/{cluster}_SIG_DEG.csv'),sep='\t')
+write.table(sig_deg,glue('{savepath}/{celltype}_MAST_SIG_DEG.csv'),sep='\t')
 
+num_up <- nrow(sig_deg[sig_deg$coef > 0,])
+num_down <- nrow(sig_deg[sig_deg$coef < 0,])
 
-# check consistency of direction 
-print('check consistency')
+EnhancedVolcano(deg,subtitle=NULL,title=glue("{celltype} {cond} vs CON MAST"),
+                lab=deg$primerid,x='coef',y='fdr',pCutoff=0.01,labSize=4,FCcutoff=log2(1.2),
+                caption=glue("genes in at least 5% of cells = ", length(filtered_genes), "\n",
+                             "SIG UP = ", num_up, "\n", "SIG DOWN = ", num_down, "\n"),
+                legendLabels = c("NS", expression(log[2] ~ FC), "FDR", expression(FDR ~ and ~ log[2] ~ FC)))
 
-mat <- cpms
-data@meta.data$condition <- meta$Condition
-df <- data@meta.data['condition']
-rownames(df) <- 1:nrow(df)
-con_ind <- which(df$condition=='CON')
-cond_ind <- which(df$condition==cond)
-sig_down <- sig_deg[sig_deg$coef < 0,]
-sig_up <- sig_deg[sig_deg$coef > 0,]
-
-count <- 0
-for (i in 1:dim(sig_up)[1]) {
-    gene <- sig_up$primerid[i]
-    df[[i]] <- mat[gene,]
-    con_mean <- mean(df[[i]][con_ind])
-    cond_mean <- mean(df[[i]][cond_ind])
-    if ((sig_up[sig_up$primerid==gene,]$coef > 0) & (cond_mean - con_mean > 0)) {
-        count <- count + 1
-    }
-}
-consistent_up <- round(count/(dim(sig_up)[1]),3)
-print(glue('Consistent up: ', {consistent_up}))
-
-count <- 0
-for (i in 1:dim(sig_down)[1]) {
-    gene <- sig_down$primerid[i]
-    df[[i]] <- mat[gene,]
-    con_mean <- mean(df[[i]][con_ind])
-    cond_mean <- mean(df[[i]][cond_ind])
-    if ((sig_down[sig_down$primerid==gene,]$coef < 0) & (cond_mean - con_mean < 0)) {
-        count <- count + 1
-    }
-}
-consistent_down <- round(count/(dim(sig_down)[1]),3)
-print(glue('Consistent down: ', {consistent_down}))
-
-
-EnhancedVolcano(deg,lab=deg$primerid,x='coef',y='fdr',pCutoff=0.01,title=glue("{cluster} {cond} vs CON MAST"),labSize=4,FCcutoff=log2(1.2),caption=glue("genes in at least 5% of cells = ", nrow(deg), " sig degs = ", nrow(sig_deg), "\nconsistent down = ",consistent_down, " consistent up = ", consistent_up),legendLabels = c("NS", expression(log[2] ~ FC), "FDR", expression(FDR ~ and ~ log[2] ~ FC)))
-
-ggsave(glue('{folder}/{cluster}_volcano.png'))
+ggsave(glue('{savepath}/{celltype}_MAST_volcano.png'))
 
