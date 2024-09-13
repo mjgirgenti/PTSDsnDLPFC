@@ -1,0 +1,44 @@
+# snRNA-seq Analysis Pipeline
+
+This is the instruction and tutorial for the snRNA-seq part of the analysis.
+
+## Preprocessing
+
+We first run cellranger and cellbender to generate the initial raw count matrices. To run the pipeline, use 
+
+```
+./preprocess.sh <sample_id> <fastq_location> <ref_genome_location>
+```
+
+## Quality Control
+
+Then, we conduct an initial quality control and doublet removal:
+
+```
+python filter_cells_genes_doublets.py
+```
+
+Please change the file path, output path, and sample ID accordingly in the file before running it. It should give the filtered count matrices as a `.zarr` file which can be loaded by pegasus.
+
+## Differentially Expressed Genes
+
+Finally, we conduct the DEG analysis using MAST, Wilcox, and DESeq2. To run these three analysis, use the following scripts. 
+
+```
+Rscript MAST_DEG.R
+Rscript WILCOX_DEG.R
+Rscript DESEQ2_DEG.R
+```
+
+For all 3 analyses, please specify the cell type and condition inside the corresponding files. 
+
+## Cell Aggregation
+
+We also conduct the meta-cell construction and WGCNA analysis on the metadcells:
+
+```
+Rscript create_metacells.R
+Rscript wgcna_metacells.R
+```
+
+Please specify the dataset name and path (the h5seurat and the corresponding metadata csv files) in the script. 
