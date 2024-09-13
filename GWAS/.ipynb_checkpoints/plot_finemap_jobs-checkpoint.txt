@@ -1,0 +1,10 @@
+module load miniconda; conda activate ATAC2; Rscript plot_finemap2.R --gene ELFN1 --gwas totalPCL --celltype INH --tad1 1570000 --tad2 2200000
+module load miniconda; conda activate ATAC2; Rscript plot_finemap2.R --gene EGR3 --gwas totalPCL --celltype EXC --tad1 22240000 --tad2 23000000 
+module load miniconda; conda activate ATAC2; Rscript plot_finemap2.R --gene KCNIP4 --gwas totalPCL --celltype EXC --tad1 21850000 --tad2 22240000 
+module load miniconda; conda activate ATAC2; Rscript plot_finemap2.R --gene LRFN5 --gwas totalPCL --celltype EXC --tad1 41600000 --tad2 41880000
+module load miniconda; conda activate ATAC2; Rscript plot_finemap2.R --gene OPCML --gwas reexperiencing --celltype INH --tad1 NAN --tad2 NAN
+module load miniconda; conda activate ATAC2; Rscript plot_finemap2.R --gene EGR3 --gwas totalPCL --celltype INH --tad1 NAN --tad2 NAN 
+module load miniconda; conda activate ATAC2; Rscript plot_finemap2.R --gene CAMKV --gwas reexperiencing --celltype EXC --tad1 NAN --tad2 NAN
+module load miniconda; conda activate ATAC2; Rscript plot_finemap2.R --gene CAMKV --gwas totalPCL --celltype EXC --tad1 NAN --tad2 NAN
+module load miniconda; conda activate ATAC2; Rscript plot_finemap2.R --gene TCF4 --gwas reexperiencing --celltype INH --tad1 NAN --tad2 NAN
+module load miniconda; conda activate ATAC2; Rscript plot_finemap2.R --gene CRHR1 --gwas totalPCL --celltype INH --tad1 NAN --tad2 NAN
