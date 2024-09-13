@@ -24,7 +24,6 @@ Below, we will list the major steps and associating script files in this directo
 - Differentially accessed peaks: `diffpeaks_tf.R`
 - Add group coverage for downstream analysis: `add_groupcoverages.R`
 - Add deviation matrices: `addDeviationsMatrix.R`
-- Add ChromVAR TF enrichment analysis: `chromvar.R`
 - TF Footprinting: `footprinting,R`
 
 ## Connect to downstream analysis
