@@ -12,18 +12,16 @@ library(argparse)
 
 parser <- ArgumentParser()
 parser$add_argument('--celltype', type='character', help='celltype')
-parser$add_argument('--condition', type='character', help='condition')
+parser$add_argument('--condition', type='character', help='condition', default='PTSD')
 parser$add_argument('--datapath', type='character', help='datapath')
 parser$add_argument('--savepath', type='character', help='savepath')
 parser$add_argument('--cpm', type='character', help='cpm', default='F')
-parser$add_argument('--covs', type='character', help='covs', default='all')
 args <- parser$parse_args()
 
 celltype <- args$celltype
 cond <- args$condition
 datapath <- args$datapath
 savepath <- args$savepath
-covs <- args$covs
 print(celltype)
 print(cond)
 
@@ -61,6 +59,7 @@ data@meta.data$wellKey <- rownames(data@meta.data)
 genes <- data.frame(rownames(data$RNA@counts))
 colnames(genes) <- c('primerid')
 sca <- FromMatrix(logcpms,data@meta.data,genes)
+print(dim(sca))
 
 num_con <- floor(dim(meta[meta$Condition=='CON',])[1]*0.05)
 num_cond <- floor(dim(meta[meta$Condition==cond,])[1]*0.05)
@@ -70,14 +69,14 @@ cond_sums <- rowSums(bin_counts[, which(meta$Condition==cond)])
 df <- data.frame(con=con_sums,cond=cond_sums)
 filtered_genes <- rownames(df[df$con >= num_con | df$cond >= num_cond,])
 sca <- sca[filtered_genes,]
+print(dim(sca))
 
 meta <- transform(meta, AgeDeath = as.numeric(AgeDeath))
 meta <- transform(meta, PMI = as.numeric(PMI))
 meta <- transform(meta, RIN = as.numeric(RIN))
 
 colData(sca)$cdr <- scale(colSums(assay(sca)>0))
-colData(sca)$condition <- as.factor(meta$Condition)
-colData(sca)$condition <- relevel(colData(sca)$condition,'CON')
+colData(sca)$condition <- relevel(as.factor(meta$Condition),'CON')
 colData(sca)$age <- as.numeric(meta$AgeDeath)
 colData(sca)$pmi <- as.numeric(meta$PMI)
 colData(sca)$rin <- as.numeric(meta$RIN)
@@ -85,31 +84,7 @@ colData(sca)$sex <- as.factor(meta$Sex)
 colData(sca)$race <- as.factor(meta$Race)
 
 print('starting MAST')
-if (covs=='all') {
-    print('Running with all covariates')
-    zlm_output <- zlm(~ condition + cdr + age + pmi + rin + sex + race, sca)
-} else if (covs=='cdr') {
-    print('Running with cdr covariate only')
-    zlm_output <- zlm(~ condition + cdr, sca)
-} else if (covs=='age') {
-    print('Running with age covariate only')
-    zlm_output <- zlm(~ condition + age, sca)
-} else if (covs=='pmi') {
-    print('Running with pmi covariate only')
-    zlm_output <- zlm(~ condition + pmi, sca)
-} else if (covs=='rin') {
-    print('Running with rin covariate only')
-    zlm_output <- zlm(~ condition + rin, sca)
-} else if (covs=='sex') {
-    print('Running with sex covariate only')
-    zlm_output <- zlm(~ condition + sex, sca)
-} else if (covs=='race') {
-    print('Running with race covariate only')
-    zlm_output <- zlm(~ condition + race, sca)
-} else {
-    print('Running without covariates')
-    zlm_output <- zlm(~ condition, sca)
-}
+zlm_output <- zlm(~ condition + cdr + age + pmi + rin + race, sca)
 print('finished MAST')
 
 summaryCond <- summary(zlm_output, doLRT=glue('condition{cond}')) 
@@ -129,7 +104,7 @@ write.table(sig_deg,glue('{savepath}/{celltype}_MAST_SIG_DEG.csv'),sep='\t')
 num_up <- nrow(sig_deg[sig_deg$coef > 0,])
 num_down <- nrow(sig_deg[sig_deg$coef < 0,])
 
-EnhancedVolcano(deg,subtitle=NULL,title=glue("{celltype} {cond} vs CON MAST"),
+EnhancedVolcano(deg,subtitle=NULL,
                 lab=deg$primerid,x='coef',y='fdr',pCutoff=0.01,labSize=4,FCcutoff=log2(1.2),
                 caption=glue("genes in at least 5% of cells = ", length(filtered_genes), "\n",
                              "SIG UP = ", num_up, "\n", "SIG DOWN = ", num_down, "\n"),

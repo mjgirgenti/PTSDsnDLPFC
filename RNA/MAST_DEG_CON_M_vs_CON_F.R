@@ -12,23 +12,21 @@ library(argparse)
 
 parser <- ArgumentParser()
 parser$add_argument('--celltype', type='character', help='celltype')
-parser$add_argument('--condition', type='character', help='condition')
+parser$add_argument('--condition', type='character', help='condition', default='M')
 parser$add_argument('--datapath', type='character', help='datapath')
 parser$add_argument('--savepath', type='character', help='savepath')
 parser$add_argument('--cpm', type='character', help='cpm', default='F')
-parser$add_argument('--covs', type='character', help='covs', default='all')
 args <- parser$parse_args()
 
 celltype <- args$celltype
 cond <- args$condition
 datapath <- args$datapath
 savepath <- args$savepath
-covs <- args$covs
 print(celltype)
 print(cond)
 
-data <- LoadH5Seurat(glue('{datapath}/{cond}_CON_{celltype}.h5seurat'),assays='RNA',meta.data=FALSE)
-meta <- read.delim2(glue('{datapath}/{cond}_CON_{celltype}_meta.txt'))
+data <- LoadH5Seurat(glue('{datapath}/CON_{celltype}.h5seurat'),assays='RNA',meta.data=FALSE)
+meta <- read.delim2(glue('{datapath}/CON_{celltype}_meta.txt'))
 
 protein <- read.table('/home/ah2428/ShareZhangLab/CommonData/protein_coding.genes.with.chr.txt')$V2
 protein_genes <- intersect(rownames(data),protein)
@@ -62,14 +60,15 @@ genes <- data.frame(rownames(data$RNA@counts))
 colnames(genes) <- c('primerid')
 sca <- FromMatrix(logcpms,data@meta.data,genes)
 
-num_con <- floor(dim(meta[meta$Condition=='CON',])[1]*0.05)
-num_cond <- floor(dim(meta[meta$Condition==cond,])[1]*0.05)
+num_con <- floor(dim(meta[meta$Sex=='F',])[1]*0.05)
+num_cond <- floor(dim(meta[meta$Sex==cond,])[1]*0.05)
 
-con_sums <- rowSums(bin_counts[, which(meta$Condition=='CON')])
-cond_sums <- rowSums(bin_counts[, which(meta$Condition==cond)])
+con_sums <- rowSums(bin_counts[, which(meta$Sex=='F')])
+cond_sums <- rowSums(bin_counts[, which(meta$Sex==cond)])
 df <- data.frame(con=con_sums,cond=cond_sums)
 filtered_genes <- rownames(df[df$con >= num_con | df$cond >= num_cond,])
 sca <- sca[filtered_genes,]
+print(dim(sca))
 
 meta <- transform(meta, AgeDeath = as.numeric(AgeDeath))
 meta <- transform(meta, PMI = as.numeric(PMI))
@@ -77,45 +76,21 @@ meta <- transform(meta, RIN = as.numeric(RIN))
 
 colData(sca)$cdr <- scale(colSums(assay(sca)>0))
 colData(sca)$condition <- as.factor(meta$Condition)
-colData(sca)$condition <- relevel(colData(sca)$condition,'CON')
 colData(sca)$age <- as.numeric(meta$AgeDeath)
 colData(sca)$pmi <- as.numeric(meta$PMI)
 colData(sca)$rin <- as.numeric(meta$RIN)
 colData(sca)$sex <- as.factor(meta$Sex)
+colData(sca)$sex <-relevel(colData(sca)$sex,'F')
 colData(sca)$race <- as.factor(meta$Race)
 
 print('starting MAST')
-if (covs=='all') {
-    print('Running with all covariates')
-    zlm_output <- zlm(~ condition + cdr + age + pmi + rin + sex + race, sca)
-} else if (covs=='cdr') {
-    print('Running with cdr covariate only')
-    zlm_output <- zlm(~ condition + cdr, sca)
-} else if (covs=='age') {
-    print('Running with age covariate only')
-    zlm_output <- zlm(~ condition + age, sca)
-} else if (covs=='pmi') {
-    print('Running with pmi covariate only')
-    zlm_output <- zlm(~ condition + pmi, sca)
-} else if (covs=='rin') {
-    print('Running with rin covariate only')
-    zlm_output <- zlm(~ condition + rin, sca)
-} else if (covs=='sex') {
-    print('Running with sex covariate only')
-    zlm_output <- zlm(~ condition + sex, sca)
-} else if (covs=='race') {
-    print('Running with race covariate only')
-    zlm_output <- zlm(~ condition + race, sca)
-} else {
-    print('Running without covariates')
-    zlm_output <- zlm(~ condition, sca)
-}
+zlm_output <- zlm(~ sex + cdr + age + pmi + rin + race, sca)
 print('finished MAST')
 
-summaryCond <- summary(zlm_output, doLRT=glue('condition{cond}')) 
+summaryCond <- summary(zlm_output, doLRT=glue('sex{cond}')) 
 summaryDt <- summaryCond$datatable
-deg <- merge(summaryDt[contrast==glue('condition{cond}') & component=='H',.(primerid, `Pr(>Chisq)`)], #hurdle P values
-                      summaryDt[contrast==glue('condition{cond}') & component=='logFC', .(primerid, coef, ci.hi, ci.lo)], by='primerid') #logFC coefficients
+deg <- merge(summaryDt[contrast==glue('sex{cond}') & component=='H',.(primerid, `Pr(>Chisq)`)], #hurdle P values
+                      summaryDt[contrast==glue('sex{cond}') & component=='logFC', .(primerid, coef, ci.hi, ci.lo)], by='primerid') #logFC coefficients
 
 deg[,fdr:=p.adjust(`Pr(>Chisq)`, 'fdr')]
 
@@ -129,7 +104,7 @@ write.table(sig_deg,glue('{savepath}/{celltype}_MAST_SIG_DEG.csv'),sep='\t')
 num_up <- nrow(sig_deg[sig_deg$coef > 0,])
 num_down <- nrow(sig_deg[sig_deg$coef < 0,])
 
-EnhancedVolcano(deg,subtitle=NULL,title=glue("{celltype} {cond} vs CON MAST"),
+EnhancedVolcano(deg,subtitle=NULL,title=glue("{celltype} CON M vs CON F MAST"),
                 lab=deg$primerid,x='coef',y='fdr',pCutoff=0.01,labSize=4,FCcutoff=log2(1.2),
                 caption=glue("genes in at least 5% of cells = ", length(filtered_genes), "\n",
                              "SIG UP = ", num_up, "\n", "SIG DOWN = ", num_down, "\n"),

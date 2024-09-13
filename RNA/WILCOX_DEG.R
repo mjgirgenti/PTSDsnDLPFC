@@ -1,4 +1,3 @@
-library(MAST)
 library(Seurat)
 library(SeuratDisk)
 library(ggplot2)
@@ -8,104 +7,89 @@ library(data.table)
 library(stringr)
 library(edgeR)
 library(dplyr)
+library(argparse)
+library(presto)
 
-args = commandArgs(trailingOnly=TRUE)
+parser <- ArgumentParser()
+parser$add_argument('--celltype', type='character', help='celltype')
+parser$add_argument('--condition', type='character', help='condition')
+parser$add_argument('--sex', type='character', help='sex', default='F')
+parser$add_argument('--datapath', type='character', help='datapath')
+parser$add_argument('--savepath', type='character', help='savepath')
+parser$add_argument('--cdr', type='character', help='cdr', default='F')
+args <- parser$parse_args()
 
-cluster <- args[1] # celltype
-cond <- args[2] # condition (PTSD,MDD)
+celltype <- args$celltype
+cond <- args$condition
+sex <- args$sex
+datapath <- args$datapath
+savepath <- args$savepath
+cdr <- args$cdr
+print(celltype)
+print(cond)
 
-folder <- glue('/gpfs/gibbs/pi/girgenti/JZhang/commonData/PTSD/RNA/results/062522_DEG/subclass/wilcox/{cond}_vs_CON')
-data <- LoadH5Seurat(glue('/gpfs/gibbs/pi/girgenti/JZhang/commonData/PTSD/RNA/data/DEG_data_subclass_062522/{cond}_vs_CON/{cond}_CON_{cluster}.h5seurat'),assays='RNA')
-meta <- read.delim2(glue('/gpfs/gibbs/pi/girgenti/JZhang/commonData/PTSD/RNA/data/DEG_data_subclass_062522/{cond}_vs_CON/{cond}_CON_{cluster}_meta.txt'))
-
-# if exceed R memory 2^31
-if (dim(data)[2] > 76745) {
-    print('True')
-    mat <- data$RNA@counts
-    tmp <- matrix(data = 0, nrow=nrow(mat), ncol=ncol(mat))
-    row_pos <- mat@i+1
-    col_pos <- findInterval(seq(mat@x)-1,mat@p[-1])+1
-    val <- mat@x
-    for (i in seq_along(val)){
-        tmp[row_pos[i],col_pos[i]] <- val[i]
-    }
-    rownames(tmp) <- rownames(mat)
-    colnames(tmp) <- colnames(mat)
-    dge <- DGEList(counts = tmp)
-    dge <- edgeR::calcNormFactors(dge)
-    cpms <- cpm(dge)
-} else {
-    dge <- DGEList(counts = data$RNA@counts)
-    dge <- edgeR::calcNormFactors(dge)
-    cpms <- cpm(dge)
-}
-
-
-num_con <- floor(dim(meta[meta$Condition=='CON',])[1]*0.05)
-num_cond <- floor(dim(meta[meta$Condition==cond,])[1]*0.05)
-
-counts <- data$RNA@counts
-if (dim(data)[2] > 76745) {
-    bin_counts <- as.matrix((tmp > 0) + 0)
-} else {
+if (sex=='T') {
+    data <- LoadH5Seurat(glue('{datapath}/CON_{celltype}.h5seurat'),assays='RNA',meta.data=FALSE)
+    meta <- read.delim2(glue('{datapath}/CON_{celltype}_meta.txt'))
+    protein <- read.table('/home/ah2428/ShareZhangLab/CommonData/protein_coding.genes.with.chr.txt')$V2
+    protein_genes <- intersect(rownames(data),protein)
+    data <- data[protein_genes,]
+    print(dim(data))
+    data <- NormalizeData(data, normalization.method = "RC", scale.factor = 1e6)
+    num_con <- floor(dim(meta[meta$Sex=='F',])[1]*0.05)
+    num_cond <- floor(dim(meta[meta$Sex==cond,])[1]*0.05)
+    counts <- data$RNA@counts
     bin_counts <- as.matrix((counts > 0) + 0)
-}
-con_sums <- rowSums(bin_counts[, which(meta$Condition=='CON')])
-cond_sums <- rowSums(bin_counts[, which(meta$Condition==cond)])
-df <- data.frame(con=con_sums,cond=cond_sums)
-filtered_genes <- rownames(df[df$con >= num_con | df$cond >= num_cond,])
-data <- data[filtered_genes,]
-
-data$condition <- meta$Condition
-Idents(data) <- 'condition'
-
-markers <- FindMarkers(data, ident.1=glue('{cond}'), ident.2='CON', slot='data', test.use='wilcox', logfc.threshold=0, min.pct=0)
-sig_deg = markers[ which(markers$p_val_adj < 0.01 & abs(markers$avg_log2FC) > log2(1.2)), ]
-write.table(markers,glue('{folder}/{cluster}_DEG.csv'),sep='\t')
-write.table(sig_deg,glue('{folder}/{cluster}_SIG_DEG.csv'),sep='\t')
-
-mat <- cpms
-
-data@meta.data$condition <- meta$Condition
-df <- data@meta.data['condition']
-rownames(df) <- 1:nrow(df)
-name2 = 'avg_log2FC'
-
-con_ind <- which(df$condition=='CON')
-cond_ind <- which(df$condition==cond)
-
-# check consistency of direction 
-print('check consistency')
-
-sig_down <- sig_deg[sig_deg[[name2]] < 0,]
-sig_up <- sig_deg[sig_deg[[name2]] > 0,]
-
-count <- 0
-for (i in 1:dim(sig_up)[1]) {
-    gene <- rownames(sig_up)[i]
-    df[[i]] <- mat[gene,]
-    con_mean <- mean(df[[i]][con_ind])
-    cond_mean <- mean(df[[i]][cond_ind])
-    if ((sig_up[rownames(sig_up)==gene,][[name2]] > 0) & (cond_mean - con_mean > 0)) {
-        count <- count + 1
+    con_sums <- rowSums(bin_counts[, which(meta$Sex=='F')])
+    cond_sums <- rowSums(bin_counts[, which(meta$Sex==cond)])
+    df <- data.frame(con=con_sums,cond=cond_sums)
+    filtered_genes <- rownames(df[df$con >= num_con | df$cond >= num_cond,])
+    data <- data[filtered_genes,]
+    print(dim(data))
+    data$sex <- meta$Sex
+    Idents(data) <- 'sex'
+    deg <- FindMarkers(data, ident.1=glue('{cond}'), ident.2='F', slot='data', test.use='wilcox', logfc.threshold=0, min.pct=0)
+    title <- glue('{celltype} CON M vs CON F WILCOX')
+} else {
+    data <- LoadH5Seurat(glue('{datapath}/{cond}_CON_{celltype}.h5seurat'),assays='RNA',meta.data=FALSE)
+    meta <- read.delim2(glue('{datapath}/{cond}_CON_{celltype}_meta.txt'))
+    protein <- read.table('/home/ah2428/ShareZhangLab/CommonData/protein_coding.genes.with.chr.txt')$V2
+    protein_genes <- intersect(rownames(data),protein)
+    data <- data[protein_genes,]
+    print(dim(data))
+    data <- NormalizeData(data, normalization.method = "RC", scale.factor = 1e6)
+    num_con <- floor(dim(meta[meta$Condition=='CON',])[1]*0.05)
+    num_cond <- floor(dim(meta[meta$Condition==cond,])[1]*0.05)
+    counts <- data$RNA@counts
+    bin_counts <- as.matrix((counts > 0) + 0)
+    con_sums <- rowSums(bin_counts[, which(meta$Condition=='CON')])
+    cond_sums <- rowSums(bin_counts[, which(meta$Condition==cond)])
+    df <- data.frame(con=con_sums,cond=cond_sums)
+    filtered_genes <- rownames(df[df$con >= num_con | df$cond >= num_cond,])
+    data <- data[filtered_genes,]
+    print(dim(data))
+    data$condition <- meta$Condition
+    Idents(data) <- 'condition'
+    data$cdr <- scale(data$nCount_RNA)
+    if (cdr=='T') {
+        data$RNA@data <- data$RNA@data/data$cdr
+        deg <- FindMarkers(data, ident.1=glue('{cond}'), ident.2='CON', slot='data', test.use='wilcox', logfc.threshold=0, min.pct=0)
+    } else {
+        deg <- FindMarkers(data, ident.1=glue('{cond}'), ident.2='CON', slot='data', test.use='wilcox', logfc.threshold=0, min.pct=0)
     }
+    title <- glue('{celltype} {cond} vs CON WILCOX')
 }
-consistent_up <- round(count/(dim(sig_up)[1]),3)
-print(glue('Consistent up: ', {consistent_up}))
 
-count <- 0
-for (i in 1:dim(sig_down)[1]) {
-    gene <- rownames(sig_down)[i]
-    df[[i]] <- mat[gene,]
-    con_mean <- mean(df[[i]][con_ind])
-    cond_mean <- mean(df[[i]][cond_ind])
-    if ((sig_down[rownames(sig_down)==gene,][[name2]] < 0) & (cond_mean - con_mean < 0)) {
-        count <- count + 1
-    }
-}
-consistent_down <- round(count/(dim(sig_down)[1]),3)
-print(glue('Consistent down: ', {consistent_down}))
+sig_deg = deg[ which(deg$p_val_adj < 0.01 & abs(deg$avg_log2FC) > log2(1.2)), ]
+write.table(deg,glue('{savepath}/{celltype}_WILCOX_DEG.csv'),sep='\t')
 
-EnhancedVolcano(markers,lab=rownames(markers),x='avg_log2FC',y='p_val_adj',pCutoff=0.01,title=glue("{cluster} {cond} vs CON Wilcox"),labSize=4,FCcutoff=log2(1.2),caption=glue("genes in at least 5% of cells = ", nrow(markers), " sig degs = ", nrow(sig_deg)),legendLabels = c("NS", expression(log[2] ~ FC), "FDR", expression(FDR ~ and ~ log[2] ~ FC)))
+num_up <- nrow(sig_deg[sig_deg$avg_log2FC > 0,])
+num_down <- nrow(sig_deg[sig_deg$avg_log2FC < 0,])
 
-ggsave(glue('{folder}/{cluster}_volcano.png'))
+EnhancedVolcano(deg,subtitle=NULL,title=title,
+                lab=rownames(deg),x='avg_log2FC',y='p_val_adj',pCutoff=0.01,labSize=4,FCcutoff=log2(1.2),
+                caption=glue("genes in at least 5% of cells = ", length(filtered_genes), "\n",
+                             "SIG UP = ", num_up, "\n", "SIG DOWN = ", num_down, "\n"),
+                legendLabels = c("NS", expression(log[2] ~ FC), "FDR", expression(FDR ~ and ~ log[2] ~ FC)))
+
+ggsave(glue('{savepath}/{celltype}_WILCOX_volcano.png'))
