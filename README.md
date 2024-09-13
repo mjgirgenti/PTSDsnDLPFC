@@ -33,9 +33,9 @@ The repository is divided into directories: `RNA`, `CCC`, `ATAC`, `Multiome`, an
 
 ## Quick Tutorials
 
-We have curated tutorials specific to each modality of the analysis to show how our pipeline works. Please review the README.md files at each modality for details.
+We have curated tutorials specific to each major analysis to show how our pipeline works. Please review the README.md files under each directory for details.
 
-In addition, we provided the [Jupyter notebooks](https://github.com/mjgirgenti/PTSDsnDLPFC/tree/main/notebooks) that we used to generate figures, with sample input and output. 
+In addition, we provide the [Jupyter notebooks](https://github.com/mjgirgenti/PTSDsnDLPFC/tree/main/notebooks) that we used to generate the figures, with sample input and output. 
 
 ## Cite Our Work
 
