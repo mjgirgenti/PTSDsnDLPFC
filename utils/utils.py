@@ -7,59 +7,27 @@ import pandas as pd
 import os
 import sys
 import subprocess
+import time
 import random
 import json
 import csv
+import multiprocessing as mp
+from utils.lists import *
 
-
-protein_coding = pd.read_csv('/gpfs/gibbs/pi/gerstein/jz435/ShareZhangLab/PTSD/RNA/data/protein_coding.genes.with.chr.txt',sep='\t',header=None)[1].values
-
-lake_genes = ['MRC1','TMEM119','CX3CR1','APBB1IP','CLDN5','FLT1','DUSP1','COBLL1','GLUL','SOX9','AQP4','GJA1','NDRG2','GFAP','ALDH1A1','ALDH1L1','VIM','SLC4A4','PDGFRA','PCDH15','OLIG2','OLIG1','PLP1','MAG','MOG','MOBP','MBP','SATB2','SLC17A7','GRM4','GAD2','GAD1','SLC32A1','SST','PVALB','STMN2','RBFOX3']
-
-celltypes = ['EXC','INH','OLI','OPC','END','AST','MIC']
-
-subtypes = ['CUX2','RORB','FEZF2','OPRK1','LAMP5','KCNG1','VIP','SST','PVALB','OLI','OPC','END','AST','MIC']
-
-exc_subtypes = ['CUX2','RORB','FEZF2','OPRK1']
-
-inh_subtypes = ['LAMP5','KCNG1','VIP','SST','PVALB']
-
-celltype_colors = {
-    'EXC':'#b22222',
-    'INH':'#2E8B57',
-    'OLI':'#5254a3',
-    'OPC':'#aec7e8',
-    'END':'#bc80bd',
-    'AST':'#ffed6f',
-    'MIC':'#7f7f7f'}
-
-subtype_colors = {
-    'CUX2': '#ad494a',
-    'RORB': '#e7969c',
-    'FEZF2': '#843c39',
-    'OPRK1': '#d6616b',
-    'LAMP5': '#637939',
-    'KCNG1': '#a6d854',
-    'VIP': '#cedb9c',
-    'SST': '#8ca252',
-    'PVALB': '#b5cf6b',
-    'OLI': '#5254a3',
-    'OPC': '#aec7e8',
-    'END': '#bc80bd',
-    'AST': '#ffed6f',
-    'MIC': '#7f7f7f'}
-
-
-
+    
 # To convert h5ad to h5seurat for DEG analysis
-def save_h5ad_and_metadata(data,data_folder,name):
-    data.obs.to_csv(data_folder+f'{name}.csv')
-    data.obs = data.obs[['Channel']]
-    data.obsm['X_pca'] = data.obsm['X_pca_harmony']
-    data.obsm = pegasusio.datadict.DataDict(dict((k,data.obsm[k]) for k in ('X_pca','X_umap')))
-    data.varm = pegasusio.datadict.DataDict()
-    data.uns = pegasusio.datadict.DataDict()
-    pg.write_output(data, data_folder+f'{name}.h5ad')
+#def save_h5ad_and_metadata(data,data_folder,name):
+#    data.obs.to_csv(data_folder+f'{name}.csv')
+#    data.obs = data.obs[['Channel']]
+#    data.obsm['X_pca'] = data.obsm['X_pca_harmony']
+#    data.obsm = pegasusio.datadict.DataDict(dict((k,data.obsm[k]) for k in ('X_pca','X_umap')))
+#    data.varm = pegasusio.datadict.DataDict()
+#    data.uns = pegasusio.datadict.DataDict()
+#    pg.write_output(data, data_folder+f'{name}.h5ad')
+
+def replace_celltype_names(df):
+    df['Celltype'] = df['Celltype'].replace({'EXC':'EXN','INH':'IN','OLI':'OLG','MIC':'MG'})
+    return df
     
 def get_cluster(data,cluster):
     barcode_list = []
