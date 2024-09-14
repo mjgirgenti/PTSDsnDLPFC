@@ -334,3 +334,28 @@ def plot_xenium_slide(brnum,gene,color,savepath):
     plt.savefig(f'{savepath}/{brnum}_{gene}_xenium_slide.pdf',bbox_inches='tight',dpi=1000)
     plt.show()
     return sdata
+
+def plot_xenium_gene_exp_barplot(gene):
+    data = sc.read_h5ad('/gpfs/gibbs/pi/girgenti/ah2428/xenium/data_processed_resegment/snXenium.h5ad')
+    data_pg = MultimodalData(data)
+    pg.log_norm(data_pg,base_matrix='raw')
+    
+    con_cells = data.obs[data.obs.Condition=='CON'].index.values
+    ptsd_cells = data.obs[data.obs.Condition=='PTSD'].index.values
+    data_ptsd_con = data[np.append(con_cells,ptsd_cells),:]
+    
+    df = snXenium_violin(data_ptsd_con,attrs=gene,groupby='celltype',hue='Condition')
+    df['label'] = df['label'].astype('category')
+    df['label'] = df['label'].cat.reorder_categories(['EXC','INH','OLI','OPC','END','AST','MIC'])
+    x = pd.DataFrame(df.groupby(['label','Condition'])[gene].mean())
+    x = x.loc[['EXC','INH','OLI','OPC','END','AST','MIC']]
+    x = x.reset_index()
+    
+    plt.rcParams['font.size']='16'
+    fig, ax = plt.subplots(figsize=(8,2))
+    ax.bar(np.arange(7),x[x.Condition=='CON'][gene].values,width=0.4,label='CON',color='lightgray')
+    ax.bar(np.arange(7)+0.4,x[x.Condition=='PTSD'][gene].values,width=0.4,label='PTSD',color='tab:blue')
+    ax.set_xticks(np.arange(7)+0.2,['EXN','IN','OLG','OPC','END','AST','MG'])
+    plt.legend(frameon=False)
+    plt.ylabel(f'{gene} exp')
+    plt.show()
