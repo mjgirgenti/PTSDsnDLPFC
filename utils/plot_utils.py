@@ -359,3 +359,47 @@ def plot_xenium_gene_exp_barplot(gene):
     plt.legend(frameon=False)
     plt.ylabel(f'{gene} exp')
     plt.show()
+
+def plot_colortable(colors, *, ncols=4, sort_colors=True):
+    if sort_colors is True:
+        names = sorted(
+            colors, key=lambda c: tuple(mcolors.rgb_to_hsv(mcolors.to_rgb(c))))
+    else:
+        names = list(colors)
+    return names
+
+def create_metadata_df(meta,colname,name):
+    arr = []
+    for s in meta[colname].cat.categories:
+        vals = list(meta[meta[colname]==s][name].value_counts()[sorted(meta[name].unique())]/meta[meta[colname]==s][name].value_counts()[sorted(meta[name].unique())].sum())
+        arr.append(vals)
+    df = pd.DataFrame(arr)
+    df.insert(0, colname, meta[colname].cat.categories, True)
+    df.columns = [colname]+sorted(meta[name].unique())
+    return df 
+
+def create_metadata_df_bins(meta,colname,name):
+    arr = []
+    for s in meta[colname].cat.categories:
+        temp = pd.cut(meta[meta[colname]==s][name],bins=10)
+        vals = list(temp.value_counts()[sorted(temp.cat.categories)]/meta[meta[colname]==s][name].value_counts().sum())
+        arr.append(vals)
+    df = pd.DataFrame(arr)
+    df.insert(0, colname, meta[colname].cat.categories, True)
+    df.columns = [colname]+sorted(temp.cat.categories)
+    return df 
+
+def metadata_barplot(df,colname,cmap,savefile):
+    plt.rcParams['pdf.fonttype'] = 42
+    plt.rcParams['ps.fonttype'] = 42
+    if cmap is not None:
+        df.plot(colname,kind='bar',stacked=True,rot=45,fontsize=16,figsize=(7,5),legend=False,cmap=cmap)
+    else:
+        df.plot(colname,kind='bar',stacked=True,rot=45,fontsize=16,figsize=(7,5),legend=False)
+    plt.xticks(np.arange(len(df[colname].values)), df[colname].values, ha='right',rotation_mode='anchor')
+    plt.ylabel('Proportion',fontsize=16)
+    plt.xlabel(' ')
+    plt.savefig(savefile,bbox_inches='tight',dpi=300)
+
+
+
