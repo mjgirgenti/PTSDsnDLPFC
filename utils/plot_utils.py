@@ -401,5 +401,209 @@ def metadata_barplot(df,colname,cmap,savefile):
     plt.xlabel(' ')
     plt.savefig(savefile,bbox_inches='tight',dpi=300)
 
+def scPower_plot():
+    celltypes = ['EXC','CUX2','RORB','FEZF2','OPRK1','INH','LAMP5','KCNG1','VIP','SST','PVALB','OLI','OPC','END','AST','MIC']
+    celltypes2 = ['EXN','CUX2','RORB','FEZF2','OPRK1','IN','LAMP5','KCNG1','VIP','SST','PVALB','OLG','OPC','END','AST','MG']
+    colors = [celltype_colors[i] for i in celltypes]
+    
+    ptsd_powers = []
+    for celltype in celltypes:
+        power = pd.read_csv(f'/home/ah2428/ShareZhangLab/PTSD/RNA/scPower/{celltype}_PTSD_power.txt',sep='\t').x.values
+        power = [x.split(' ')[1] for x in power]
+        ptsd_powers.append(power)
+    ptsd_powers = np.array(ptsd_powers).astype(float)
+    
+    mdd_powers = []
+    for celltype in celltypes:
+        power = pd.read_csv(f'/home/ah2428/ShareZhangLab/PTSD/RNA/scPower/{celltype}_MDD_power.txt',sep='\t').x.values
+        power = [x.split(' ')[1] for x in power]
+        mdd_powers.append(power)
+    mdd_powers = np.array(mdd_powers).astype(float)    
+    
+    plt.rcParams['font.size']='14'
+    plt.rcParams['grid.color'] = 'lightgray'
+    plt.rcParams['axes.grid'] = True
+    
+    fig, ax = plt.subplots(1,2, figsize=(12,5),sharey=True)
+    ax = ax.flatten()
+    xs = [100,200,500,1000,2000,3000,4000,5000]
+    
+    for ii,celltype in enumerate(celltypes2):
+        ax[0].plot(xs,ptsd_powers[ii],'-o',label=celltype,markersize=3,linewidth=1,color=colors[ii])
+        ax[1].plot(xs,mdd_powers[ii],'-o',label=celltype,markersize=3,linewidth=1,color=colors[ii])
+    ax[0].set_ylim([0,1.05])
+    ax[1].legend(frameon=False,bbox_to_anchor=(1,1),fontsize='small')
+    ax[0].set_title('PTSD vs CON')
+    ax[1].set_title('MDD vs CON')
+    ax[0].set_ylabel('Power')
+    ax[0].set_xlabel('Number of cells per sample')
+    ax[1].set_xlabel('Number of cells per sample')
+    fig.tight_layout()
+    plt.show()
+
+def ncells_per_sample_boxplot():
+    celltypes = ['EXC','CUX2','RORB','FEZF2','OPRK1','INH','LAMP5','KCNG1','VIP','SST','PVALB','OLI','OPC','END','AST','MIC']
+    celltypes2 = ['EXN','CUX2','RORB','FEZF2','OPRK1','IN','LAMP5','KCNG1','VIP','SST','PVALB','OLG','OPC','END','AST','MG']
+    colors = [celltype_colors[i] for i in celltypes]
+    
+    meta = pd.read_csv('/home/ah2428/ShareZhangLab/PTSD/RNA/data/RNA_FINAL_meta.csv',sep='\t')
+    ptsd_meta = meta[meta.Condition.isin(['PTSD','CON'])]
+    mdd_meta = meta[meta.Condition.isin(['MDD','CON'])]
+
+    ptsd_ncells = []
+    for celltype in celltypes:
+        if celltype in ptsd_meta['subclass'].unique():
+            ncell = ptsd_meta[ptsd_meta['subclass']==celltype].Channel.value_counts().values
+        elif celltype in ptsd_meta['class'].unique():
+            ncell = ptsd_meta[ptsd_meta['class']==celltype].Channel.value_counts().values
+        else:
+            pass
+        ptsd_ncells.append(ncell)
+    
+    mdd_ncells = []
+    for celltype in celltypes:
+        if celltype in mdd_meta['subclass'].unique():
+            ncell = mdd_meta[mdd_meta['subclass']==celltype].Channel.value_counts().values
+        elif celltype in mdd_meta['class'].unique():
+            ncell = mdd_meta[mdd_meta['class']==celltype].Channel.value_counts().values
+        else:
+            pass
+        mdd_ncells.append(ncell)
+    
+    fig, ax = plt.subplots(1,2,figsize=(12,5),sharey=True)
+    plt.rcParams['axes.grid'] = True
+    plt.rcParams['grid.color'] = 'lightgray'
+    
+    boxes1 = []
+    boxes2 = []
+    for i,celltype,c in zip(np.arange(16),celltypes2,colors):
+        bp1 = ax[0].boxplot(ptsd_ncells[i],showfliers=True,medianprops=dict(color='k'),positions=[i],widths=0.5,patch_artist=True)
+        boxes1.append(bp1)
+        ax[0].set_xticks(np.arange(16),celltypes2,rotation=45,ha='right',rotation_mode='anchor')
+        bp2 = ax[1].boxplot(mdd_ncells[i],showfliers=True,medianprops=dict(color='k'),positions=[i],widths=0.5,patch_artist=True)
+        ax[1].set_xticks(np.arange(16),celltypes2,rotation=45,ha='right',rotation_mode='anchor')
+        boxes2.append(bp2)
+    
+    for box,c in zip(boxes1,colors):
+        box['boxes'][0].set_facecolor(c)
+    
+    for box,c in zip(boxes2,colors):
+        box['boxes'][0].set_facecolor(c)
+        
+    ax[0].set_ylabel('Number of cells per sample')
+    ax[0].set_title('PTSD vs CON')
+    ax[1].set_title('MDD vs CON')
+    
+    fig.tight_layout()
+    plt.show()
+
+def celltype_proportions_barplot():
+    celltypes = ['EXC','CUX2','RORB','FEZF2','OPRK1','INH','LAMP5','KCNG1','VIP','SST','PVALB','OLI','OPC','END','AST','MIC']
+    celltypes2 = ['EXN','CUX2','RORB','FEZF2','OPRK1','IN','LAMP5','KCNG1','VIP','SST','PVALB','OLG','OPC','END','AST','MG']
+    colors = [celltype_colors[i] for i in celltypes]
+    
+    meta = pd.read_csv('/home/ah2428/ShareZhangLab/PTSD/RNA/data/RNA_FINAL_meta.csv',sep='\t')
+    ptsd_meta = meta[meta.Condition.isin(['PTSD','CON'])]
+    mdd_meta = meta[meta.Condition.isin(['MDD','CON'])]
+
+    ptsd_props = []
+    for celltype in celltypes:
+        if celltype in ptsd_meta['subclass'].unique():
+            prop = ptsd_meta[ptsd_meta['subclass']==celltype].shape[0]/ptsd_meta.shape[0]
+        elif celltype in ptsd_meta['class'].unique():
+            prop = ptsd_meta[ptsd_meta['class']==celltype].shape[0]/ptsd_meta.shape[0]
+        else:
+            pass
+        ptsd_props.append(prop)
+    
+    mdd_props = []
+    for celltype in celltypes:
+        if celltype in mdd_meta['subclass'].unique():
+            prop = mdd_meta[mdd_meta['subclass']==celltype].shape[0]/mdd_meta.shape[0]
+        elif celltype in mdd_meta['class'].unique():
+            prop = mdd_meta[mdd_meta['class']==celltype].shape[0]/mdd_meta.shape[0]
+        else:
+            pass
+        mdd_props.append(prop)
+    
+    fig, ax = plt.subplots(1,2,figsize=(12,5),sharey=True)
+    plt.rcParams['axes.grid'] = True
+    
+    ax[0].bar(np.arange(len(celltypes2)),ptsd_props,color=colors)
+    ax[1].bar(np.arange(len(celltypes2)),mdd_props,color=colors)
+    ax[0].set_xticks(np.arange(len(celltypes2)),celltypes2,rotation=45,ha='right',rotation_mode='anchor')
+    ax[1].set_xticks(np.arange(len(celltypes2)),celltypes2,rotation=45,ha='right',rotation_mode='anchor')
+    ax[0].set_ylabel('Proportion of cells')
+    ax[0].set_title('PTSD vs CON')
+    ax[1].set_title('MDD vs CON')
+    
+    fig.tight_layout()
+    plt.show()
+
+def num_genes_vs_DEGs():
+    celltypes = ['EXC','CUX2','RORB','FEZF2','OPRK1','INH','LAMP5','KCNG1','VIP','SST','PVALB','OLI','OPC','END','AST','MIC']
+    celltypes2 = ['EXN','CUX2','RORB','FEZF2','OPRK1','IN','LAMP5','KCNG1','VIP','SST','PVALB','OLG','OPC','END','AST','MG']
+    colors = [celltype_colors[i] for i in celltypes]
+    
+    ptsd_deg = pd.read_csv('/home/ah2428/ShareZhangLab/PTSD/RNA/DEG_results_df/snRNA/PTSD_vs_CON/MAST_WILCOX_intersect.csv',sep='\t')
+    mdd_deg = pd.read_csv('/home/ah2428/ShareZhangLab/PTSD/RNA/DEG_results_df/snRNA/MDD_vs_CON/MAST_WILCOX_intersect.csv',sep='\t')
+
+    gene_avgs_ptsd = []
+    degs_ptsd = []
+    for ii,c in enumerate(celltypes):
+        gene_avg = pd.read_csv(f'/home/ah2428/ShareZhangLab/PTSD/RNA/ngenes/{c}_PTSD_binary_cell_counts_robust.txt',sep=' ').x.mean()
+        deg = ptsd_deg[ptsd_deg.Celltype==c].shape[0]
+        gene_avgs_ptsd.append(gene_avg)
+        degs_ptsd.append(deg)
+        
+    gene_avgs_mdd = []
+    degs_mdd = []
+    for ii,c in enumerate(celltypes):
+        gene_avg = pd.read_csv(f'/home/ah2428/ShareZhangLab/PTSD/RNA/ngenes/{c}_MDD_binary_cell_counts_robust.txt',sep=' ').x.mean()
+        deg = mdd_deg[mdd_deg.Celltype==c].shape[0]
+        gene_avgs_mdd.append(gene_avg)
+        degs_mdd.append(deg)
+
+    ptsd_df = pd.DataFrame({'x':gene_avgs_ptsd,'y':degs_ptsd,'celltype':celltypes})
+    mdd_df = pd.DataFrame({'x':gene_avgs_mdd,'y':degs_mdd,'celltype':celltypes})
+
+    celltypes2 = ['EXN','CUX2','RORB','FEZF2','OPRK1','IN','LAMP5','KCNG1','VIP','SST','PVALB','OLG','OPC','END','AST','MG']
+    plt.rcParams['font.size']='14'
+    fig, ax = plt.subplots(1,2,figsize=(10,5),sharey=True)
+    
+    for i in range(16):
+        ax[0].scatter(ptsd_df.x[i], ptsd_df.y[i], color=colors[i])
+    
+    for i, txt in enumerate(celltypes2):
+        ax[0].annotate(txt, (ptsd_df.x[i]-130, ptsd_df.y[i]+20),fontsize=7)
+    ax[0].set_ylabel('Number of DEGs')
+    ax[0].set_xlabel('Average number of genes')
+    ax[0].set_xlim([500,4800])
+    ax[0].set_ylim([0,1100])
+    ax[0].set_title('PTSD vs CON')
+    
+    for i in range(16):
+        ax[1].scatter(mdd_df.x[i], mdd_df.y[i], color=colors[i])
+    ax[1].set_xlabel('Average number of genes')
+    for i, txt in enumerate(celltypes2):
+        ax[1].annotate(txt, (mdd_df.x[i]-130, mdd_df.y[i]+20),fontsize=7)
+    ax[1].set_xlim([500,4800])
+    ax[1].set_title('MDD vs CON')
+    
+    fig.tight_layout()
+    plt.show()
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
