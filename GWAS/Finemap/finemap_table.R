@@ -12,7 +12,7 @@ gene <- args[1]
 celltype <- args[2]
 gwas <- args[3]
 
-namelist <- read.table("/home/ah2428/palmer_scratch/PTSD/FINEMAP/namelist_new2.csv")
+namelist <- read.table("riskgenes.csv")
 
 chromstart <- namelist[namelist$genes==gene,]$starts
 chromend <- namelist[namelist$genes==gene,]$ends

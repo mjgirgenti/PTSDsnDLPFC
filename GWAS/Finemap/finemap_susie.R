@@ -17,7 +17,7 @@ celltype <- args[3]
 weight <- as.numeric(args[4]) 
 
 
-namelist <- read.table("/home/ah2428/project/PTSD/FINEMAP/namelist_new.csv")
+namelist <- read.table("riskgenes.csv")
 
 bedNA <- function(bed1){
   for(j in 1:ncol(bed1)){

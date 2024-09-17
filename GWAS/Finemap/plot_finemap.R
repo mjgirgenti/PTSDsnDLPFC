@@ -22,7 +22,7 @@ proj <- loadArchRProject('/home/ah2428/ShareZhangLab/PTSD/ATAC/data/ATAC_FINAL')
 
 union_peaks <- read.table('/gpfs/gibbs/pi/gerstein/jz435/ShareZhangLab/PTSD/ATAC/data/peaks/union_peaks_meta.bed',sep='\t',header=1)
 
-namelist <- read.table("/home/ah2428/palmer_scratch/PTSD/FINEMAP/riskgenes.csv")
+namelist <- read.table("riskgenes.csv")
 
 parser <- ArgumentParser()
 parser$add_argument('--gene', type='character')
