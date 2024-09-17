@@ -1,10 +1,10 @@
 # snRNA-seq Analysis Pipeline
 
-This is the instruction and tutorial for the snRNA-seq part of the analysis.
+Here is the tutorial for snRNA-seq analysis.
 
 ## Preprocessing
 
-We first run cellranger and cellbender to generate the initial raw count matrices. To run the pipeline, use 
+We first run cellranger and cellbender to generate the initial raw count matrices. To run the pipeline, use: 
 
 ```
 ./preprocess.sh <sample_id> <fastq_location> <ref_genome_location>
@@ -12,17 +12,28 @@ We first run cellranger and cellbender to generate the initial raw count matrice
 
 ## Quality Control
 
-Then, we conduct an initial quality control and doublet removal:
+Then, we conduct initial quality control and doublet removal:
 
 ```
 python filter_cells_genes_doublets.py
 ```
 
-Please change the file path, output path, and sample ID accordingly in the file before running it. It should give the filtered count matrices as a `.zarr` file which can be loaded by pegasus.
+Please change the file path, output path, and sample ID accordingly in the file before running it. It should give the filtered count matrices as a `.zarr` file which can be loaded in pegasus.
+
+## Clustering
+
+Perform the first round of clustering using:
+```
+python ahyeon_snRNA_pipeline.py
+```
+Clean the UMAP and perform clustering again using:
+```
+python ahyeon_snRNA_pipeline_second.py
+```
 
 ## Differentially Expressed Genes
 
-Finally, we conduct the DEG analysis using MAST, Wilcox, and DESeq2. To run these three analysis, use the following scripts. 
+Conduct DEG analysis using MAST, Wilcox, and DESeq2:  
 
 ```
 Rscript MAST_DEG.R
@@ -30,11 +41,11 @@ Rscript WILCOX_DEG.R
 Rscript DESEQ2_DEG.R
 ```
 
-For all 3 analyses, please specify the cell type and condition inside the corresponding files. 
+For all three scripts, please specify the cell type and condition. 
 
 ## Cell Aggregation
 
-We also conduct the meta-cell construction and WGCNA analysis on the metadcells:
+We also conduct meta-cell construction and WGCNA analysis on the metacells:
 
 ```
 Rscript create_metacells.R
