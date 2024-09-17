@@ -31,6 +31,14 @@ Clean the UMAP and perform clustering again using:
 python ahyeon_snRNA_pipeline_second.py
 ```
 
+## Differential Abundance Analysis
+
+Compare PTSD vs CON, MDD vs CON, and PTSD vs MDD using:
+
+```
+python scCODA.py
+```
+
 ## Differentially Expressed Genes
 
 Conduct DEG analysis using MAST, Wilcox, and DESeq2:  
