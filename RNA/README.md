@@ -41,15 +41,24 @@ python scCODA.py
 
 ## Differentially Expressed Genes
 
-Conduct DEG analysis using MAST, Wilcox, and DESeq2:  
+Conduct DEG analysis using MAST, Wilcox, Nebula, and DESeq2:  
 
 ```
 Rscript MAST_DEG.R
 Rscript WILCOX_DEG.R
+Rscript NEBULA_DEG.R
 Rscript DESEQ2_DEG.R
 ```
 
 For all three scripts, please specify the cell type and condition. 
+
+## Rank-Rank Hypergeometric Overlap
+
+Perform threshold-free comparison of PTSD and MDD DEGs using:
+
+```
+Rscript RRHO.R
+``` 
 
 ## Cell Aggregation
 
