@@ -52,6 +52,14 @@ Rscript DESEQ2_DEG.R
 
 For all three scripts, please specify the cell type and condition. 
 
+## Gene Ontology Analysis
+
+Perform Gene Ontology analysis with EnrichR using:
+
+```
+Rscript GO_enrichR.R 
+```
+
 ## Rank-Rank Hypergeometric Overlap
 
 Perform threshold-free comparison of PTSD and MDD DEGs using:
