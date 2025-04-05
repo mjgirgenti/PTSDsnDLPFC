@@ -5,7 +5,7 @@ from scipy.stats import pearsonr
 from matplotlib.colors import LinearSegmentedColormap
 
 
-# Extended Data Figure 10b
+# ED Fig. 10b
 
 def truncate_colormap(cmap, minval=0.0, maxval=1.0, n=-1):
     if n == -1:

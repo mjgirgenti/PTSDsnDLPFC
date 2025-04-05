@@ -6,7 +6,7 @@ library(RColorBrewer)
 
 ### Credit: Yingxin Lin ###
 
-# Figure 6a: LDSC enrichment
+# Fig. 5a: LDSC enrichment
 
 dir <- "/gpfs/gibbs/pi/gerstein/jz435/ShareZhangLab/PTSD/LDSC/unique_peaks/results"
 

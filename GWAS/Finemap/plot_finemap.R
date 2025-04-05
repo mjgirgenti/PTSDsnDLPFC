@@ -12,7 +12,7 @@ library("tidyr")
 library(argparse)
 
 
-# Figure 6c-f and Extended Data Figure 10
+# Fig. 5c-f and ED Fig. 10c-h
 
 args = commandArgs(trailingOnly=TRUE)
 
