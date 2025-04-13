@@ -275,7 +275,7 @@ def snXenium_violin(
     df = pd.concat(df_list, axis = 1)
     return df
 
-def plot_xenium_slide(brnum,gene,color,savepath):
+def get_xenium_sdata(brnum):
     sdata = spatialdata_io.xenium(f'/gpfs/gibbs/pi/girgenti/ah2428/xenium/data/{brnum}_resegment/outs/')
     data = sc.read_h5ad('/gpfs/gibbs/pi/girgenti/ah2428/xenium/data_processed_resegment/snXenium.h5ad')
     condition = data.obs[data.obs.Channel==int(brnum)].Condition.unique()[0]
@@ -319,20 +319,7 @@ def plot_xenium_slide(brnum,gene,color,savepath):
     sdata.set_table_annotates_spatialelement("table", region="cell_boundaries")
     
     sdata.tables['table'].obs.celltype = sdata.tables['table'].obs.celltype.cat.reorder_categories(['EXC','INH','OLI','OPC','END','AST','MIC'])
-    
-    sdata.pl.render_shapes("cell_boundaries",
-                           color='celltype',
-                           groups=['EXC','INH','OLI','OPC','END','AST','MIC'],
-                           palette=['#b22222', '#2E8B57', '#5254a3', '#aec7e8', '#bc80bd', '#ffed6f', '#7f7f7f'],
-                           scale=5, 
-                           outline=False, 
-                           fill_alpha=0.1).pl.render_points('transcripts',color='feature_name',groups=gene,palette=color,size=1).pl.show(figsize=(10,20))
-    
-    plt.legend('',frameon=False)
-    plt.title('')
-    plt.axis('off')
-    plt.savefig(f'{savepath}/{brnum}_{gene}_xenium_slide.pdf',bbox_inches='tight',dpi=1000)
-    plt.show()
+
     return sdata
 
 def plot_xenium_gene_exp_barplot(gene):
