@@ -1,6 +1,6 @@
-# Single cell transcriptomic and epigenomic atlas of >2M nuclei from the human PTSD brain
+# Single cell transcriptomic and chromatin dynamics of the human PTSD brain
 
-This is the source code repository for *Single cell transcriptomic and epigenomic atlas of >2M nuclei from the human PTSD brain*. The main analyses use both Python and R, with specific packages detailed below. We include tutorials and expected output (including runtime) to show how it runs on our dataset. 
+This is the source code repository for *Single cell transcriptomic and chromatin dynamics of the human PTSD brain*. The main analyses use both Python and R, with specific packages detailed below. We include tutorials and expected output (including runtime) to show how it runs on our dataset. 
 
 ## System Requirements
 
