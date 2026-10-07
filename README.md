@@ -1,6 +1,6 @@
-# Single cell transcriptomic and chromatin dynamics of the human PTSD brain
+# Single-cell transcriptomic and chromatin dynamics of the human brain in PTSD
 
-This is the source code repository for *Single cell transcriptomic and chromatin dynamics of the human PTSD brain*. The main analyses use both Python and R, with specific packages detailed below. We include tutorials and expected output (including runtime) to show how it runs on our dataset. 
+This is the source code repository for [Single-cell transcriptomic and chromatin dynamics of the human brain in PTSD](https://www.nature.com/articles/s41586-025-09083-y). The main analyses use both Python and R, with specific packages detailed below.
 
 ## System Requirements
 
@@ -37,6 +37,3 @@ We have curated tutorials specific to each major analysis to show how our pipeli
 
 In addition, we provide the [Jupyter notebooks](https://github.com/mjgirgenti/PTSDsnDLPFC/tree/main/notebooks) that we used to generate the figures, with sample input and output. 
 
-## Cite Our Work
-
-To be added...
